@@ -338,8 +338,8 @@
   <main class="game">
     <header class="hud">
       <div>
-        <h1 class="title">🤝 Dap Duel: QTE Edition</h1>
-        <p class="subtitle">Quick-time events: press the shown key before time runs out to sync a real dap.</p>
+        <h1 class="title">🤝 Dap Duel: 2-Player QTE</h1>
+        <p class="subtitle">Both players must complete their button sequence before time runs out to land the dap.</p>
       </div>
       <div class="stats">
         <div class="chip">Score: <span id="score">0</span></div>
@@ -354,7 +354,8 @@
         <div class="message" id="message">Press Start QTE to begin.</div>
 
         <div class="qte-hud" id="qteHud" hidden>
-          <div class="qte-key">Press <span id="qteKey">A</span></div>
+          <div class="qte-key">Player 1 (A/S/D/F): <span id="p1Seq">A</span></div>
+          <div class="qte-key">Player 2 (J/K/L/I): <span id="p2Seq">J</span></div>
           <div class="bar"><div id="qteBar"></div></div>
         </div>
 
@@ -388,6 +389,10 @@
           <h3>Game controls</h3>
           <button id="startBtn" type="button">Start QTE</button>
           <button id="restartBtn" class="ghost" type="button">Reset Score</button>
+          <p style="margin:0;color:var(--muted);font-size:.85rem;">
+            P1 keys: <strong>A S D F</strong><br>
+            P2 keys: <strong>J K L I</strong>
+          </p>
         </section>
 
         <section class="panel">
@@ -455,7 +460,8 @@
   </main>
 
   <script>
-    const KEYS = ['A', 'S', 'D', 'F'];
+    const P1_KEYS = ['A', 'S', 'D', 'F'];
+    const P2_KEYS = ['J', 'K', 'L', 'I'];
 
     const scoreEl = document.getElementById('score');
     const streakEl = document.getElementById('streak');
@@ -463,7 +469,8 @@
     const roundEl = document.getElementById('round');
     const messageEl = document.getElementById('message');
     const qteHud = document.getElementById('qteHud');
-    const qteKeyEl = document.getElementById('qteKey');
+    const p1SeqEl = document.getElementById('p1Seq');
+    const p2SeqEl = document.getElementById('p2Seq');
     const impact = document.getElementById('impact');
 
     const leftPerson = document.getElementById('leftPerson');
@@ -490,7 +497,10 @@
     let best = Number(localStorage.getItem('dap-best-qte') || 0);
 
     let qteActive = false;
-    let requiredKey = 'A';
+    let p1Sequence = [];
+    let p2Sequence = [];
+    let p1Index = 0;
+    let p2Index = 0;
     let qteStart = 0;
     let qteDuration = 1800;
     let raf = null;
@@ -536,6 +546,10 @@
       impact.classList.add('pop');
     }
 
+    function renderSequence(seq, index) {
+      return seq.map((key, i) => (i < index ? `✅${key}` : key)).join(' ');
+    }
+
     function finishQTE(result) {
       qteActive = false;
       qteHud.hidden = true;
@@ -549,18 +563,18 @@
         score += bonus;
         streak += 1;
         round += 1;
-        setMessage(`Clean dap! +${bonus}`, 'good');
+        setMessage(`Team dap success! +${bonus}`, 'good');
         setTimeout(() => setArms(true), 220);
       } else if (result === 'wrong') {
         streak = 0;
         score = Math.max(0, score - 35);
         setArms(true);
-        setMessage('Wrong key. Missed dap! -35', 'bad');
+        setMessage('Wrong key for one player. Missed dap! -35', 'bad');
       } else {
         streak = 0;
         score = Math.max(0, score - 50);
         setArms(true);
-        setMessage('Too slow. Dap window closed! -50', 'warn');
+        setMessage('Too slow. Team sequence incomplete! -50', 'warn');
       }
 
       if (score > best) {
@@ -595,13 +609,18 @@
       if (qteActive) return;
 
       qteActive = true;
-      requiredKey = KEYS[Math.floor(Math.random() * KEYS.length)];
+      const sequenceLength = Math.min(5, 2 + Math.floor((round - 1) / 2));
+      p1Sequence = Array.from({ length: sequenceLength }, () => P1_KEYS[Math.floor(Math.random() * P1_KEYS.length)]);
+      p2Sequence = Array.from({ length: sequenceLength }, () => P2_KEYS[Math.floor(Math.random() * P2_KEYS.length)]);
+      p1Index = 0;
+      p2Index = 0;
       qteDuration = Math.max(850, 1800 - Math.min(950, (round - 1) * 55));
       qteStart = performance.now();
 
       qteHud.hidden = false;
-      qteKeyEl.textContent = requiredKey;
-      setMessage(`Quick! Press ${requiredKey}`, '');
+      p1SeqEl.textContent = renderSequence(p1Sequence, p1Index);
+      p2SeqEl.textContent = renderSequence(p2Sequence, p2Index);
+      setMessage(`Go! Both players enter ${sequenceLength} keys.`, '');
 
       startBtn.disabled = true;
       startBtn.textContent = 'QTE Running...';
@@ -620,13 +639,34 @@
         return;
       }
 
-      if (!KEYS.includes(key)) return;
+      let touched = false;
+      if (P1_KEYS.includes(key)) {
+        touched = true;
+        if (key === p1Sequence[p1Index]) {
+          p1Index += 1;
+        } else {
+          finishQTE('wrong');
+          return;
+        }
+      }
+      if (P2_KEYS.includes(key)) {
+        touched = true;
+        if (key === p2Sequence[p2Index]) {
+          p2Index += 1;
+        } else {
+          finishQTE('wrong');
+          return;
+        }
+      }
+
+      if (!touched) return;
 
       e.preventDefault();
-      if (key === requiredKey) {
+      p1SeqEl.textContent = renderSequence(p1Sequence, p1Index);
+      p2SeqEl.textContent = renderSequence(p2Sequence, p2Index);
+
+      if (p1Index >= p1Sequence.length && p2Index >= p2Sequence.length) {
         finishQTE('success');
-      } else {
-        finishQTE('wrong');
       }
     }
 
@@ -655,7 +695,7 @@
 
     updateCustomization();
     setArms(true);
-    setMessage('Customize players, then start a QTE.', '');
+    setMessage('Customize players, then start a 2-player QTE.', '');
   </script>
 </body>
 </html>
