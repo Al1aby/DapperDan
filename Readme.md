@@ -1,6 +1,6 @@
  (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/README.md b/README.md
-index 77b81a19fd643fb0da67193e2f33c0ce4041a330..1ff7ba456d32fff04389ee83202456beec5bf10a 100644
+index 77b81a19fd643fb0da67193e2f33c0ce4041a330..159be6fabba34bd7a983481d5ce6d424f0272de7 100644
 --- a/README.md
 +++ b/README.md
 @@ -19,25 +19,29 @@ Then open: `http://localhost:8080`
@@ -32,7 +32,7 @@ index 77b81a19fd643fb0da67193e2f33c0ce4041a330..1ff7ba456d32fff04389ee83202456be
 +
 +## Bonus mini-game
 +
-+- `dap-game.html` – Timing mini-game where two people dap each other.
++- `dap-game.html` – Quick-time-event dap game with player customization (names, colors, skin tones, hats).
  
 EOF
 )
