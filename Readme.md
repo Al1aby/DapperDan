@@ -1,9 +1,3 @@
-diff --git a/README.md b/README.md
-index 77b81a19fd643fb0da67193e2f33c0ce4041a330..2a4f3bbd54c287907df2c98f0eedd670ef2fcdf3 100644
---- a/README.md
-+++ b/README.md
-@@ -7,37 +7,44 @@ Flow Foundry is a lightweight browser puzzle game where you rotate tiles to conn
- Because this project is plain HTML/CSS/JS, you can run it with any static server.
  
  ### Option 1: Python
  
