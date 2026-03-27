@@ -1,3 +1,4 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/index.html b/index.html
 index 683b3965beead153c801fb5db4213de4077d9f60..ea035bd160b3c0c4a7a7acac7cdd907654dd2574 100644
 --- a/index.html
@@ -140,3 +141,6 @@ index 683b3965beead153c801fb5db4213de4077d9f60..ea035bd160b3c0c4a7a7acac7cdd9076
 -</html>
 \ No newline at end of file
 +</html>
+ 
+EOF
+)
