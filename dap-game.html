@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dap Dash</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --ink: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #22d3ee;
+      --good: #34d399;
+      --warn: #f59e0b;
+      --bad: #fb7185;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: radial-gradient(circle at top, #1e293b, var(--bg));
+      color: var(--ink);
+      padding: 1rem;
+    }
+
+    .game {
+      width: min(920px, 100%);
+      background: linear-gradient(180deg, #0b1225, #0a1020);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,.45);
+    }
+
+    .hud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .75rem;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.2rem;
+      background: rgba(255,255,255,.04);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .title { margin: 0; font-size: clamp(1.2rem, 2.5vw, 1.6rem); }
+    .subtitle { margin: .25rem 0 0; color: var(--muted); font-size: .95rem; }
+
+    .stats {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      background: #111827;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 999px;
+      padding: .45rem .8rem;
+      font-weight: 700;
+      font-size: .9rem;
+    }
+
+    .arena {
+      position: relative;
+      height: 430px;
+      background: linear-gradient(180deg, #1f2937 0%, #1f2937 74%, #334155 74%, #334155 100%);
+      overflow: hidden;
+    }
+
+    .person {
+      position: absolute;
+      width: 180px;
+      height: 280px;
+      bottom: 70px;
+    }
+
+    .head {
+      position: absolute;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #f1c27d;
+      top: 4px;
+      left: 62px;
+      border: 2px solid rgba(0,0,0,.18);
+    }
+
+    .torso {
+      position: absolute;
+      width: 82px;
+      height: 106px;
+      border-radius: 20px;
+      top: 62px;
+      left: 49px;
+      background: #2563eb;
+    }
+
+    .left .torso { background: #0ea5e9; }
+    .right .torso { background: #a855f7; }
+
+    .leg {
+      position: absolute;
+      width: 26px;
+      height: 90px;
+      border-radius: 16px;
+      background: #1e293b;
+      top: 168px;
+    }
+
+    .leg.l1 { left: 62px; }
+    .leg.l2 { left: 92px; }
+
+    .arm {
+      position: absolute;
+      width: 64px;
+      height: 14px;
+      border-radius: 999px;
+      background: #f1c27d;
+      top: 102px;
+      left: 58px;
+      transform-origin: 7px center;
+      transition: transform .12s linear;
+      border: 1px solid rgba(0,0,0,.16);
+    }
+
+    .arm.back { top: 118px; opacity: .88; }
+
+    .hand {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #f1c27d;
+      right: -6px;
+      top: -1px;
+      border: 1px solid rgba(0,0,0,.16);
+    }
+
+    .left {
+      left: 80px;
+    }
+
+    .left .front {
+      transform: rotate(var(--left-arm, -35deg));
+    }
+
+    .right {
+      right: var(--right-x, 70px);
+    }
+
+    .right .front {
+      transform: rotate(var(--right-arm, 195deg));
+    }
+
+    .right .back {
+      transform: rotate(210deg);
+    }
+
+    .left .back {
+      transform: rotate(-18deg);
+    }
+
+    .impact {
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(.3);
+    }
+
+    .impact.show {
+      animation: pop .34s ease-out;
+    }
+
+    @keyframes pop {
+      from { opacity: 1; transform: scale(.3); }
+      to { opacity: 0; transform: scale(1.35); }
+    }
+
+    .message {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.5);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 10px;
+      padding: .45rem .8rem;
+      font-weight: 700;
+      letter-spacing: .2px;
+      min-width: 200px;
+      text-align: center;
+    }
+
+    .controls {
+      padding: .95rem 1.2rem 1.15rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: .8rem;
+      flex-wrap: wrap;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      border-radius: 10px;
+      padding: .7rem 1rem;
+      font-weight: 700;
+      color: white;
+      background: linear-gradient(180deg, #06b6d4, #0891b2);
+    }
+
+    .hint {
+      color: var(--muted);
+      margin: 0;
+      font-size: .95rem;
+    }
+
+    .good { color: var(--good); }
+    .warn { color: var(--warn); }
+    .bad { color: var(--bad); }
+  </style>
+</head>
+<body>
+  <main class="game" aria-label="Dap Dash game">
+    <header class="hud">
+      <div>
+        <h1 class="title">🤝 Dap Dash</h1>
+        <p class="subtitle">Press <strong>Space</strong> (or tap) to time a perfect dap.</p>
+      </div>
+      <div class="stats">
+        <div class="chip">Score: <span id="score">0</span></div>
+        <div class="chip">Streak: <span id="streak">0</span></div>
+        <div class="chip">Best: <span id="best">0</span></div>
+      </div>
+    </header>
+
+    <section class="arena" id="arena" aria-live="polite">
+      <div class="message" id="message">Get ready...</div>
+
+      <article class="person left" id="leftPerson">
+        <div class="head"></div>
+        <div class="torso"></div>
+        <div class="arm back"><span class="hand"></span></div>
+        <div class="arm front" id="leftArm"><span class="hand" id="leftHand"></span></div>
+        <div class="leg l1"></div>
+        <div class="leg l2"></div>
+      </article>
+
+      <article class="person right" id="rightPerson">
+        <div class="head"></div>
+        <div class="torso"></div>
+        <div class="arm back"><span class="hand"></span></div>
+        <div class="arm front" id="rightArm"><span class="hand" id="rightHand"></span></div>
+        <div class="leg l1"></div>
+        <div class="leg l2"></div>
+      </article>
+
+      <div class="impact" id="impact"></div>
+    </section>
+
+    <footer class="controls">
+      <p class="hint">Tap/click the arena or press <kbd>Space</kbd> right as hands meet for max points.</p>
+      <button id="restartBtn" type="button">Restart</button>
+    </footer>
+  </main>
+
+  <script>
+    const scoreEl = document.getElementById('score');
+    const streakEl = document.getElementById('streak');
+    const bestEl = document.getElementById('best');
+    const messageEl = document.getElementById('message');
+    const arena = document.getElementById('arena');
+    const impact = document.getElementById('impact');
+    const restartBtn = document.getElementById('restartBtn');
+
+    const leftPerson = document.getElementById('leftPerson');
+    const rightPerson = document.getElementById('rightPerson');
+
+    let score = 0;
+    let streak = 0;
+    let best = Number(localStorage.getItem('dap-best') || 0);
+    bestEl.textContent = best;
+
+    let phase = 0;
+    let targetPhase = 0.5;
+    let speed = 0.0105;
+    let active = true;
+    let lockMs = 0;
+
+    function armWave() {
+      if (!active) return;
+
+      phase += speed;
+      if (phase > 1) phase -= 1;
+
+      const rightX = 70 + Math.sin(phase * Math.PI * 2) * 44;
+      const rightArm = 192 + Math.sin(phase * Math.PI * 2) * 26;
+      const leftArm = -34 + Math.sin((phase + .2) * Math.PI * 2) * 8;
+
+      document.documentElement.style.setProperty('--right-x', `${rightX}px`);
+      document.documentElement.style.setProperty('--right-arm', `${rightArm}deg`);
+      document.documentElement.style.setProperty('--left-arm', `${leftArm}deg`);
+
+      requestAnimationFrame(armWave);
+    }
+
+    function setMessage(text, cls = '') {
+      messageEl.className = `message ${cls}`.trim();
+      messageEl.textContent = text;
+    }
+
+    function showImpact() {
+      const leftRect = document.getElementById('leftHand').getBoundingClientRect();
+      const arenaRect = arena.getBoundingClientRect();
+      impact.style.left = `${leftRect.left - arenaRect.left - 13}px`;
+      impact.style.top = `${leftRect.top - arenaRect.top - 13}px`;
+      impact.classList.remove('show');
+      void impact.offsetWidth;
+      impact.classList.add('show');
+    }
+
+    function attemptDap() {
+      if (!active || Date.now() < lockMs) return;
+
+      const diff = Math.abs(phase - targetPhase);
+      const wrappedDiff = Math.min(diff, 1 - diff);
+
+      if (wrappedDiff < 0.06) {
+        const points = wrappedDiff < 0.025 ? 120 : 80;
+        score += points;
+        streak += 1;
+        setMessage(wrappedDiff < 0.025 ? 'Perfect dap! +120' : 'Nice dap! +80', 'good');
+        showImpact();
+        speed = Math.min(0.018, speed + 0.0006);
+      } else if (wrappedDiff < 0.11) {
+        score += 35;
+        streak = 0;
+        setMessage('Late/early dap. +35', 'warn');
+        showImpact();
+      } else {
+        streak = 0;
+        score = Math.max(0, score - 45);
+        setMessage('Whiff 😬 -45', 'bad');
+        speed = Math.max(0.0085, speed - 0.0004);
+      }
+
+      lockMs = Date.now() + 240;
+      scoreEl.textContent = score;
+      streakEl.textContent = streak;
+
+      if (score > best) {
+        best = score;
+        bestEl.textContent = best;
+        localStorage.setItem('dap-best', String(best));
+      }
+    }
+
+    function resetGame() {
+      score = 0;
+      streak = 0;
+      phase = 0;
+      speed = 0.0105;
+      lockMs = 0;
+      scoreEl.textContent = '0';
+      streakEl.textContent = '0';
+      setMessage('Fresh round. Sync up and dap!', '');
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        attemptDap();
+      }
+    });
+
+    arena.addEventListener('pointerdown', attemptDap);
+    restartBtn.addEventListener('click', resetGame);
+
+    setMessage('Time the dap with Space or tap.', '');
+    armWave();
+  </script>
+</body>
+</html>
