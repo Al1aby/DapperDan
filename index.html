@@ -1,146 +1,28 @@
- (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
-diff --git a/index.html b/index.html
-index 683b3965beead153c801fb5db4213de4077d9f60..ea035bd160b3c0c4a7a7acac7cdd907654dd2574 100644
---- a/index.html
-+++ b/index.html
-@@ -16,50 +16,55 @@
-   --text:#eff3ff;
-   --muted:#a7b0d6;
-   --accent:#ffc857;
-   --danger:#ff7171;
-   --shadow:0 12px 30px rgba(0,0,0,.25);
-   --radius:18px;
-   --tile:68px;
- }
- 
- *{box-sizing:border-box}
- html,body{
-   margin:0;padding:0;background:
-   radial-gradient(circle at top, #1c2240 0%, #0f1220 55%);
-   color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-   min-height:100%;
- }
- body{padding:14px; padding-bottom:calc(14px + env(safe-area-inset-bottom));}
- button{
-   appearance:none;border:0;border-radius:14px;padding:14px 16px;font:inherit;
-   background:linear-gradient(180deg,#7c8cff,#6473ff);color:white;font-weight:700;
-   box-shadow:var(--shadow);cursor:pointer;
- }
- button:disabled{opacity:.45;cursor:not-allowed}
- .secondary-btn{background:linear-gradient(180deg,#2f385f,#252c49)}
- .icon-btn{padding:12px 14px;min-width:48px}
-+.mini-link{
-+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-+  text-decoration:none;border-radius:12px;padding:10px 12px;font-weight:700;
-+  color:#dff5ff;background:rgba(34,211,238,.14);border:1px solid rgba(34,211,238,.45)
-+}
- .app-shell{max-width:900px;margin:0 auto;display:grid;gap:14px}
- .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
- .topbar h1{margin:0;font-size:clamp(1.8rem,5vw,2.4rem)}
- .tagline{margin:.15rem 0 0;color:var(--muted)}
- .card{
-   background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
-   border:1px solid rgba(255,255,255,.08);
-   border-radius:var(--radius);
-   box-shadow:var(--shadow);
-   backdrop-filter:blur(8px);
- }
- .hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px}
- .hud-item{
-   background:rgba(255,255,255,.04);border-radius:14px;padding:10px 12px;
-   display:flex;flex-direction:column;gap:4px
- }
- .hud-item span{color:var(--muted);font-size:.85rem}
- .hud-item strong{font-size:1.15rem}
- .game-layout{display:grid;gap:14px}
- .board-card{padding:14px}
- .board-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
- .board-header h2{margin:0 0 4px}
- .board-header p{margin:0;color:var(--muted)}
- .board{
-   display:grid;gap:8px;justify-content:center;align-content:center;
-@@ -187,50 +192,52 @@ kbd{
-   .hud-item{padding:8px 10px}
-   .board-card{padding:10px}
-   .controls{gap:8px;padding:8px}
-   .level-grid{grid-template-columns:repeat(4,1fr);gap:8px}
-   .topbar h1{font-size:1.5rem}
- }
- @media (max-width:360px){
-   :root{--tile:min(19vw,58px)}
-   .level-grid{grid-template-columns:repeat(3,1fr)}
-   .controls-help{display:none}
- }
- 
-   </style>
- </head>
- <body>
-   <div class="app-shell">
- 
-     <header class="topbar">
-       <div>
-         <h1>Flow Foundry</h1>
-         <p class="tagline">Rotate tiles. Connect the flow.</p>
-       </div>
-       <button id="soundBtn" class="secondary-btn icon-btn" aria-label="Toggle sound">&#x1F50A;</button>
-     </header>
- 
-+    <a class="mini-link" href="dap-game.html">Play bonus game: Dap Duel</a>
-+
-     <div class="card hud">
-       <div class="hud-item">
-         <span>Moves</span>
-         <strong id="movesLabel">0</strong>
-       </div>
-       <div class="hud-item">
-         <span>Best</span>
-         <strong id="bestLabel">&mdash;</strong>
-       </div>
-       <div class="hud-item">
-         <span>Stars</span>
-         <strong id="starsLabel">0</strong>
-       </div>
-       <div class="hud-item">
-         <span>Progress</span>
-         <strong id="progressLabel">1 / 40 unlocked</strong>
-       </div>
-     </div>
- 
-     <div class="game-layout">
-       <div class="card board-card">
-         <div class="board-header">
-           <div>
-             <h2>Level <span id="levelLabel">1</span> &mdash; <span id="levelTitle"></span></h2>
-             <p id="levelGoal"></p>
-@@ -1714,26 +1721,26 @@ window.Sound = (() => {
-   }
-   soundBtn.textContent = state.sound === false ? '🔇' : '🔊';
-   
-   document.addEventListener('keydown', (event) => {
-     const key = event.key.toLowerCase();
-     if (key === 'u') undoMove();
-     if (key === 'r') resetLevel();
-     if (key === 'h') showHint();
-     if (key === 't') testFlow();
-     if (key === 'n') {
-       const nextBtn = document.getElementById('nextBtn');
-       if (!nextBtn.disabled) nextBtn.click();
-     }
-   });
- 
-   // Mobile: prevent page scroll when touching a rotatable tile
-   boardEl.addEventListener('touchstart', e => {
-     if (e.target.closest('button.tile:not([disabled])')) e.preventDefault();
-   }, { passive: false });
- 
-   loadLevel(levelIndex);
- })();
- 
-   </script>
- </body>
--</html>
-\ No newline at end of file
-+</html>
- 
-EOF
-)
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dap or Die</title>
+  <meta http-equiv="refresh" content="0; url=dap-game.html" />
+  <style>
+    body{
+      margin:0;min-height:100vh;display:grid;place-items:center;
+      background:radial-gradient(circle at top,#1e293b,#0f172a);
+      color:#f8fafc;font-family:Inter,system-ui,sans-serif;padding:20px;text-align:center;
+    }
+       a{color:#22d3ee;font-weight:700}
+    .card{max-width:640px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:20px}
+  </style>
+  <script>
+       window.location.replace('dap-game.html');
+  </script>
+</head>
+<body>
+  <main class="card">
+    <h1>Dap or Die</h1>
+    <p>Loading the game...</p>
+    <p>If you are not redirected, <a href="dap-game.html">play Dap or Die</a>.</p>
+  </main>
+</body>
+</html>
