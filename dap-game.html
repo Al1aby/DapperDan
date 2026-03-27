@@ -1,10 +1,9 @@
- (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/dap-game.html b/dap-game.html
 new file mode 100644
-index 0000000000000000000000000000000000000000..bf87bb4396c4febca3a20fd84435294debe0510d
+index 0000000000000000000000000000000000000000..98b903495c24d28bee1b4f5fb24cc313582e79f3
 --- /dev/null
 +++ b/dap-game.html
-@@ -0,0 +1,865 @@
+@@ -0,0 +1,891 @@
 +<!DOCTYPE html>
 +<html lang="en">
 +<head>
@@ -602,6 +601,31 @@ index 0000000000000000000000000000000000000000..bf87bb4396c4febca3a20fd84435294d
 +    const leftNameTag = document.getElementById('leftNameTag');
 +    const rightNameTag = document.getElementById('rightNameTag');
 +
++    function ensureGraphicsStyles() {
++      const probe = getComputedStyle(leftPerson);
++      if (probe.position === 'absolute' && probe.width !== '0px') return;
++
++      const fallback = document.createElement('style');
++      fallback.textContent = `
++        body{background:#0f172a;color:#f8fafc;font-family:system-ui,sans-serif}
++        .game{max-width:1080px;margin:0 auto;border:1px solid #334155;border-radius:16px;overflow:hidden}
++        .layout{display:grid;grid-template-columns:1fr 310px}
++        .arena{position:relative;min-height:520px;background:linear-gradient(#1f2937 74%,#334155 74%)}
++        .person{position:absolute;width:180px;height:290px;bottom:82px}
++        .left{left:80px}.right{right:80px}
++        .head{position:absolute;top:0;left:63px;width:54px;height:54px;border-radius:50%;background:var(--skin,#f1c27d)}
++        .torso{position:absolute;top:60px;left:48px;width:84px;height:108px;border-radius:20px;background:var(--shirt,#0ea5e9)}
++        .arm{position:absolute;top:106px;left:58px;width:68px;height:14px;border-radius:999px;background:var(--skin,#f1c27d);transform-origin:8px center}
++        .arm.back{top:122px}
++        .left .back{transform:rotate(-20deg)} .right .back{transform:rotate(200deg)}
++        .left .front{transform:rotate(var(--left-arm,-24deg))} .right .front{transform:rotate(var(--right-arm,204deg))}
++        .hand{position:absolute;right:-8px;top:-2px;width:18px;height:18px;border-radius:50%;background:inherit}
++        .leg{position:absolute;top:168px;width:26px;height:95px;border-radius:16px;background:#1e293b}
++        .leg.l1{left:63px}.leg.l2{left:93px}
++      `;
++      document.head.appendChild(fallback);
++    }
++
 +    function safeGet(key, fallback = '0') {
 +      try {
 +        const value = window.localStorage.getItem(key);
@@ -860,6 +884,7 @@ index 0000000000000000000000000000000000000000..bf87bb4396c4febca3a20fd84435294d
 +    restartBtn.addEventListener('click', resetScore);
 +    window.addEventListener('keydown', onKeyDown);
 +
++    ensureGraphicsStyles();
 +    applySelectedPacks();
 +    setArms(true);
 +    if (location.protocol === 'file:') {
@@ -870,6 +895,3 @@ index 0000000000000000000000000000000000000000..bf87bb4396c4febca3a20fd84435294d
 +  </script>
 +</body>
 +</html>
- 
-EOF
-)
