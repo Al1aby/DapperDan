@@ -3,17 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dap Dash</title>
+  <title>Dap Duel: QTE Edition</title>
   <style>
     :root {
       --bg: #0f172a;
-      --panel: #111827;
+      --bg2: #1e293b;
       --ink: #f8fafc;
       --muted: #94a3b8;
       --accent: #22d3ee;
       --good: #34d399;
       --warn: #f59e0b;
       --bad: #fb7185;
+      --left-shirt: #0ea5e9;
+      --right-shirt: #a855f7;
+      --left-skin: #f1c27d;
+      --right-skin: #c68642;
+      --left-arm: -24deg;
+      --right-arm: 204deg;
+      --qte: 0;
     }
 
     * { box-sizing: border-box; }
@@ -21,170 +28,63 @@
     body {
       margin: 0;
       min-height: 100vh;
-      display: grid;
-      place-items: center;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: radial-gradient(circle at top, #1e293b, var(--bg));
+      background: radial-gradient(circle at top, var(--bg2), var(--bg));
       color: var(--ink);
-      padding: 1rem;
+      padding: 14px;
     }
 
     .game {
-      width: min(920px, 100%);
-      background: linear-gradient(180deg, #0b1225, #0a1020);
-      border: 1px solid rgba(255,255,255,.12);
+      width: min(1080px, 100%);
+      margin: 0 auto;
+      background: linear-gradient(180deg, #0b1225, #09101f);
+      border: 1px solid rgba(255,255,255,.14);
       border-radius: 18px;
       overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0,0,0,.45);
+      box-shadow: 0 18px 40px rgba(0,0,0,.45);
     }
 
     .hud {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .75rem;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 1.2rem;
+      padding: 12px 16px;
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 1.4fr 1fr;
+      border-bottom: 1px solid rgba(255,255,255,.1);
       background: rgba(255,255,255,.04);
-      border-bottom: 1px solid rgba(255,255,255,.08);
     }
 
-    .title { margin: 0; font-size: clamp(1.2rem, 2.5vw, 1.6rem); }
-    .subtitle { margin: .25rem 0 0; color: var(--muted); font-size: .95rem; }
+    .title { margin: 0; font-size: clamp(1.2rem, 3.2vw, 1.7rem); }
+    .subtitle { margin: 4px 0 0; color: var(--muted); }
 
     .stats {
-      display: flex;
-      gap: .5rem;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(88px, 1fr));
+      gap: 8px;
+      align-self: center;
     }
 
     .chip {
-      background: #111827;
-      border: 1px solid rgba(255,255,255,.1);
       border-radius: 999px;
-      padding: .45rem .8rem;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.1);
+      background: #0f172a;
+      padding: 8px 10px;
       font-weight: 700;
       font-size: .9rem;
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 310px;
+      min-height: 520px;
     }
 
     .arena {
       position: relative;
-      height: 430px;
       background: linear-gradient(180deg, #1f2937 0%, #1f2937 74%, #334155 74%, #334155 100%);
       overflow: hidden;
-    }
-
-    .person {
-      position: absolute;
-      width: 180px;
-      height: 280px;
-      bottom: 70px;
-    }
-
-    .head {
-      position: absolute;
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      background: #f1c27d;
-      top: 4px;
-      left: 62px;
-      border: 2px solid rgba(0,0,0,.18);
-    }
-
-    .torso {
-      position: absolute;
-      width: 82px;
-      height: 106px;
-      border-radius: 20px;
-      top: 62px;
-      left: 49px;
-      background: #2563eb;
-    }
-
-    .left .torso { background: #0ea5e9; }
-    .right .torso { background: #a855f7; }
-
-    .leg {
-      position: absolute;
-      width: 26px;
-      height: 90px;
-      border-radius: 16px;
-      background: #1e293b;
-      top: 168px;
-    }
-
-    .leg.l1 { left: 62px; }
-    .leg.l2 { left: 92px; }
-
-    .arm {
-      position: absolute;
-      width: 64px;
-      height: 14px;
-      border-radius: 999px;
-      background: #f1c27d;
-      top: 102px;
-      left: 58px;
-      transform-origin: 7px center;
-      transition: transform .12s linear;
-      border: 1px solid rgba(0,0,0,.16);
-    }
-
-    .arm.back { top: 118px; opacity: .88; }
-
-    .hand {
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #f1c27d;
-      right: -6px;
-      top: -1px;
-      border: 1px solid rgba(0,0,0,.16);
-    }
-
-    .left {
-      left: 80px;
-    }
-
-    .left .front {
-      transform: rotate(var(--left-arm, -35deg));
-    }
-
-    .right {
-      right: var(--right-x, 70px);
-    }
-
-    .right .front {
-      transform: rotate(var(--right-arm, 195deg));
-    }
-
-    .right .back {
-      transform: rotate(210deg);
-    }
-
-    .left .back {
-      transform: rotate(-18deg);
-    }
-
-    .impact {
-      position: absolute;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      border: 3px solid var(--accent);
-      opacity: 0;
-      pointer-events: none;
-      transform: scale(.3);
-    }
-
-    .impact.show {
-      animation: pop .34s ease-out;
-    }
-
-    @keyframes pop {
-      from { opacity: 1; transform: scale(.3); }
-      to { opacity: 0; transform: scale(1.35); }
+      min-height: 520px;
     }
 
     .message {
@@ -192,25 +92,217 @@
       top: 16px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0,0,0,.5);
-      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.55);
+      border: 1px solid rgba(255,255,255,.2);
       border-radius: 10px;
-      padding: .45rem .8rem;
+      padding: .5rem .85rem;
       font-weight: 700;
-      letter-spacing: .2px;
-      min-width: 200px;
+      min-width: 240px;
       text-align: center;
+      z-index: 3;
     }
 
-    .controls {
-      padding: .95rem 1.2rem 1.15rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: .8rem;
-      flex-wrap: wrap;
-      border-top: 1px solid rgba(255,255,255,.08);
+    .qte-hud {
+      position: absolute;
+      left: 50%;
+      top: 62px;
+      transform: translateX(-50%);
+      width: min(420px, calc(100% - 32px));
+      background: rgba(0,0,0,.5);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 12px;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+      z-index: 3;
     }
+
+    .qte-key {
+      text-align: center;
+      font-size: 2.1rem;
+      font-weight: 900;
+      letter-spacing: 3px;
+    }
+
+    .bar {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.1);
+      overflow: hidden;
+    }
+
+    .bar > div {
+      height: 100%;
+      width: calc(var(--qte) * 100%);
+      background: linear-gradient(90deg, #22d3ee, #34d399);
+      transition: width .06s linear;
+    }
+
+    .person {
+      position: absolute;
+      width: 180px;
+      height: 290px;
+      bottom: 82px;
+    }
+
+    .left { left: 80px; }
+    .right { right: 80px; }
+
+    .head {
+      position: absolute;
+      top: 0;
+      left: 63px;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 2px solid rgba(0,0,0,.2);
+      background: var(--skin);
+    }
+
+    .name {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.45);
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: .8rem;
+      white-space: nowrap;
+    }
+
+    .torso {
+      position: absolute;
+      top: 60px;
+      left: 48px;
+      width: 84px;
+      height: 108px;
+      border-radius: 20px;
+      background: var(--shirt);
+      border: 2px solid rgba(0,0,0,.15);
+    }
+
+    .hat {
+      position: absolute;
+      top: -8px;
+      left: 60px;
+      width: 60px;
+      height: 16px;
+      border-radius: 999px;
+      background: #111827;
+      opacity: 0;
+      transform: translateY(-2px);
+    }
+
+    .person.hat-on .hat { opacity: 1; }
+
+    .leg {
+      position: absolute;
+      top: 168px;
+      width: 26px;
+      height: 95px;
+      border-radius: 16px;
+      background: #1e293b;
+    }
+
+    .leg.l1 { left: 63px; }
+    .leg.l2 { left: 93px; }
+
+    .arm {
+      position: absolute;
+      top: 106px;
+      left: 58px;
+      width: 68px;
+      height: 14px;
+      border-radius: 999px;
+      background: var(--skin);
+      border: 1px solid rgba(0,0,0,.2);
+      transform-origin: 8px center;
+      transition: transform .13s ease;
+    }
+
+    .arm.back { top: 122px; opacity: .85; }
+
+    .hand {
+      position: absolute;
+      right: -8px;
+      top: -2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--skin);
+      border: 1px solid rgba(0,0,0,.2);
+    }
+
+    .left .back { transform: rotate(-20deg); }
+    .right .back { transform: rotate(200deg); }
+    .left .front { transform: rotate(var(--left-arm)); }
+    .right .front { transform: rotate(var(--right-arm)); }
+
+    .impact {
+      position: absolute;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      pointer-events: none;
+      opacity: 0;
+      z-index: 2;
+      transform: scale(.2);
+    }
+
+    .impact.pop { animation: pop .32s ease-out; }
+
+    @keyframes pop {
+      0% { opacity: 1; transform: scale(.2); }
+      100% { opacity: 0; transform: scale(1.5); }
+    }
+
+    .side {
+      border-left: 1px solid rgba(255,255,255,.09);
+      background: rgba(255,255,255,.03);
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .panel {
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 12px;
+      padding: 10px;
+      background: rgba(0,0,0,.22);
+      display: grid;
+      gap: 8px;
+    }
+
+    .panel h3 {
+      margin: 0;
+      font-size: .95rem;
+    }
+
+    .field {
+      display: grid;
+      gap: 4px;
+    }
+
+    .field label {
+      font-size: .82rem;
+      color: var(--muted);
+    }
+
+    input[type="text"], select {
+      width: 100%;
+      background: #0f172a;
+      color: var(--ink);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 8px;
+      padding: 8px;
+      font: inherit;
+    }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
     button {
       appearance: none;
@@ -223,175 +315,347 @@
       background: linear-gradient(180deg, #06b6d4, #0891b2);
     }
 
-    .hint {
-      color: var(--muted);
-      margin: 0;
-      font-size: .95rem;
+    .ghost {
+      background: #0f172a;
+      border: 1px solid rgba(255,255,255,.16);
     }
 
     .good { color: var(--good); }
     .warn { color: var(--warn); }
     .bad { color: var(--bad); }
+
+    @media (max-width: 940px) {
+      .hud { grid-template-columns: 1fr; }
+      .layout { grid-template-columns: 1fr; }
+      .side { border-left: 0; border-top: 1px solid rgba(255,255,255,.09); }
+      .arena { min-height: 440px; }
+      .left { left: 24px; }
+      .right { right: 24px; }
+    }
   </style>
 </head>
 <body>
-  <main class="game" aria-label="Dap Dash game">
+  <main class="game">
     <header class="hud">
       <div>
-        <h1 class="title">🤝 Dap Dash</h1>
-        <p class="subtitle">Press <strong>Space</strong> (or tap) to time a perfect dap.</p>
+        <h1 class="title">🤝 Dap Duel: QTE Edition</h1>
+        <p class="subtitle">Quick-time events: press the shown key before time runs out to sync a real dap.</p>
       </div>
       <div class="stats">
         <div class="chip">Score: <span id="score">0</span></div>
         <div class="chip">Streak: <span id="streak">0</span></div>
         <div class="chip">Best: <span id="best">0</span></div>
+        <div class="chip">Round: <span id="round">1</span></div>
       </div>
     </header>
 
-    <section class="arena" id="arena" aria-live="polite">
-      <div class="message" id="message">Get ready...</div>
+    <div class="layout">
+      <section class="arena" id="arena">
+        <div class="message" id="message">Press Start QTE to begin.</div>
 
-      <article class="person left" id="leftPerson">
-        <div class="head"></div>
-        <div class="torso"></div>
-        <div class="arm back"><span class="hand"></span></div>
-        <div class="arm front" id="leftArm"><span class="hand" id="leftHand"></span></div>
-        <div class="leg l1"></div>
-        <div class="leg l2"></div>
-      </article>
+        <div class="qte-hud" id="qteHud" hidden>
+          <div class="qte-key">Press <span id="qteKey">A</span></div>
+          <div class="bar"><div id="qteBar"></div></div>
+        </div>
 
-      <article class="person right" id="rightPerson">
-        <div class="head"></div>
-        <div class="torso"></div>
-        <div class="arm back"><span class="hand"></span></div>
-        <div class="arm front" id="rightArm"><span class="hand" id="rightHand"></span></div>
-        <div class="leg l1"></div>
-        <div class="leg l2"></div>
-      </article>
+        <article class="person left" id="leftPerson" style="--shirt:var(--left-shirt); --skin:var(--left-skin)">
+          <div class="name" id="leftNameTag">Player</div>
+          <div class="hat"></div>
+          <div class="head"></div>
+          <div class="torso"></div>
+          <div class="arm back"><span class="hand"></span></div>
+          <div class="arm front"><span class="hand"></span></div>
+          <div class="leg l1"></div>
+          <div class="leg l2"></div>
+        </article>
 
-      <div class="impact" id="impact"></div>
-    </section>
+        <article class="person right" id="rightPerson" style="--shirt:var(--right-shirt); --skin:var(--right-skin)">
+          <div class="name" id="rightNameTag">Friend</div>
+          <div class="hat"></div>
+          <div class="head"></div>
+          <div class="torso"></div>
+          <div class="arm back"><span class="hand"></span></div>
+          <div class="arm front"><span class="hand"></span></div>
+          <div class="leg l1"></div>
+          <div class="leg l2"></div>
+        </article>
 
-    <footer class="controls">
-      <p class="hint">Tap/click the arena or press <kbd>Space</kbd> right as hands meet for max points.</p>
-      <button id="restartBtn" type="button">Restart</button>
-    </footer>
+        <div class="impact" id="impact"></div>
+      </section>
+
+      <aside class="side">
+        <section class="panel">
+          <h3>Game controls</h3>
+          <button id="startBtn" type="button">Start QTE</button>
+          <button id="restartBtn" class="ghost" type="button">Reset Score</button>
+        </section>
+
+        <section class="panel">
+          <h3>Player customization</h3>
+          <div class="field">
+            <label for="leftName">Left name</label>
+            <input id="leftName" type="text" maxlength="12" value="Player" />
+          </div>
+          <div class="field">
+            <label for="rightName">Right name</label>
+            <input id="rightName" type="text" maxlength="12" value="Friend" />
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="leftSkin">Left skin</label>
+              <select id="leftSkin">
+                <option value="#f1c27d">Light</option>
+                <option value="#e0ac69">Tan</option>
+                <option value="#c68642" selected>Brown</option>
+                <option value="#8d5524">Dark</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="rightSkin">Right skin</label>
+              <select id="rightSkin">
+                <option value="#f1c27d" selected>Light</option>
+                <option value="#e0ac69">Tan</option>
+                <option value="#c68642">Brown</option>
+                <option value="#8d5524">Dark</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="leftShirt">Left shirt</label>
+              <input id="leftShirt" type="color" value="#0ea5e9" />
+            </div>
+            <div class="field">
+              <label for="rightShirt">Right shirt</label>
+              <input id="rightShirt" type="color" value="#a855f7" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="leftHat">Left hat</label>
+              <select id="leftHat">
+                <option value="off" selected>No hat</option>
+                <option value="on">Hat on</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="rightHat">Right hat</label>
+              <select id="rightHat">
+                <option value="off" selected>No hat</option>
+                <option value="on">Hat on</option>
+              </select>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
   </main>
 
   <script>
+    const KEYS = ['A', 'S', 'D', 'F'];
+
     const scoreEl = document.getElementById('score');
     const streakEl = document.getElementById('streak');
     const bestEl = document.getElementById('best');
+    const roundEl = document.getElementById('round');
     const messageEl = document.getElementById('message');
-    const arena = document.getElementById('arena');
+    const qteHud = document.getElementById('qteHud');
+    const qteKeyEl = document.getElementById('qteKey');
     const impact = document.getElementById('impact');
-    const restartBtn = document.getElementById('restartBtn');
 
     const leftPerson = document.getElementById('leftPerson');
     const rightPerson = document.getElementById('rightPerson');
 
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+
+    const leftName = document.getElementById('leftName');
+    const rightName = document.getElementById('rightName');
+    const leftSkin = document.getElementById('leftSkin');
+    const rightSkin = document.getElementById('rightSkin');
+    const leftShirt = document.getElementById('leftShirt');
+    const rightShirt = document.getElementById('rightShirt');
+    const leftHat = document.getElementById('leftHat');
+    const rightHat = document.getElementById('rightHat');
+
+    const leftNameTag = document.getElementById('leftNameTag');
+    const rightNameTag = document.getElementById('rightNameTag');
+
     let score = 0;
     let streak = 0;
-    let best = Number(localStorage.getItem('dap-best') || 0);
+    let round = 1;
+    let best = Number(localStorage.getItem('dap-best-qte') || 0);
+
+    let qteActive = false;
+    let requiredKey = 'A';
+    let qteStart = 0;
+    let qteDuration = 1800;
+    let raf = null;
+
     bestEl.textContent = best;
-
-    let phase = 0;
-    let targetPhase = 0.5;
-    let speed = 0.0105;
-    let active = true;
-    let lockMs = 0;
-
-    function armWave() {
-      if (!active) return;
-
-      phase += speed;
-      if (phase > 1) phase -= 1;
-
-      const rightX = 70 + Math.sin(phase * Math.PI * 2) * 44;
-      const rightArm = 192 + Math.sin(phase * Math.PI * 2) * 26;
-      const leftArm = -34 + Math.sin((phase + .2) * Math.PI * 2) * 8;
-
-      document.documentElement.style.setProperty('--right-x', `${rightX}px`);
-      document.documentElement.style.setProperty('--right-arm', `${rightArm}deg`);
-      document.documentElement.style.setProperty('--left-arm', `${leftArm}deg`);
-
-      requestAnimationFrame(armWave);
-    }
 
     function setMessage(text, cls = '') {
       messageEl.className = `message ${cls}`.trim();
       messageEl.textContent = text;
     }
 
-    function showImpact() {
-      const leftRect = document.getElementById('leftHand').getBoundingClientRect();
-      const arenaRect = arena.getBoundingClientRect();
-      impact.style.left = `${leftRect.left - arenaRect.left - 13}px`;
-      impact.style.top = `${leftRect.top - arenaRect.top - 13}px`;
-      impact.classList.remove('show');
-      void impact.offsetWidth;
-      impact.classList.add('show');
+    function setArms(idle = true) {
+      if (idle) {
+        document.documentElement.style.setProperty('--left-arm', '-24deg');
+        document.documentElement.style.setProperty('--right-arm', '204deg');
+      } else {
+        document.documentElement.style.setProperty('--left-arm', '6deg');
+        document.documentElement.style.setProperty('--right-arm', '174deg');
+      }
     }
 
-    function attemptDap() {
-      if (!active || Date.now() < lockMs) return;
+    function updateCustomization() {
+      leftNameTag.textContent = leftName.value.trim() || 'Player';
+      rightNameTag.textContent = rightName.value.trim() || 'Friend';
 
-      const diff = Math.abs(phase - targetPhase);
-      const wrappedDiff = Math.min(diff, 1 - diff);
+      leftPerson.style.setProperty('--shirt', leftShirt.value);
+      rightPerson.style.setProperty('--shirt', rightShirt.value);
+      leftPerson.style.setProperty('--skin', leftSkin.value);
+      rightPerson.style.setProperty('--skin', rightSkin.value);
 
-      if (wrappedDiff < 0.06) {
-        const points = wrappedDiff < 0.025 ? 120 : 80;
-        score += points;
+      leftPerson.classList.toggle('hat-on', leftHat.value === 'on');
+      rightPerson.classList.toggle('hat-on', rightHat.value === 'on');
+    }
+
+    function placeImpact() {
+      const arenaRect = document.getElementById('arena').getBoundingClientRect();
+      const x = arenaRect.width / 2 - 22;
+      const y = arenaRect.height * 0.43;
+      impact.style.left = `${x}px`;
+      impact.style.top = `${y}px`;
+      impact.classList.remove('pop');
+      void impact.offsetWidth;
+      impact.classList.add('pop');
+    }
+
+    function finishQTE(result) {
+      qteActive = false;
+      qteHud.hidden = true;
+      cancelAnimationFrame(raf);
+      document.documentElement.style.setProperty('--qte', '0');
+
+      if (result === 'success') {
+        setArms(false);
+        placeImpact();
+        const bonus = 90 + Math.min(60, streak * 5);
+        score += bonus;
         streak += 1;
-        setMessage(wrappedDiff < 0.025 ? 'Perfect dap! +120' : 'Nice dap! +80', 'good');
-        showImpact();
-        speed = Math.min(0.018, speed + 0.0006);
-      } else if (wrappedDiff < 0.11) {
-        score += 35;
+        round += 1;
+        setMessage(`Clean dap! +${bonus}`, 'good');
+        setTimeout(() => setArms(true), 220);
+      } else if (result === 'wrong') {
         streak = 0;
-        setMessage('Late/early dap. +35', 'warn');
-        showImpact();
+        score = Math.max(0, score - 35);
+        setArms(true);
+        setMessage('Wrong key. Missed dap! -35', 'bad');
       } else {
         streak = 0;
-        score = Math.max(0, score - 45);
-        setMessage('Whiff 😬 -45', 'bad');
-        speed = Math.max(0.0085, speed - 0.0004);
+        score = Math.max(0, score - 50);
+        setArms(true);
+        setMessage('Too slow. Dap window closed! -50', 'warn');
       }
-
-      lockMs = Date.now() + 240;
-      scoreEl.textContent = score;
-      streakEl.textContent = streak;
 
       if (score > best) {
         best = score;
-        bestEl.textContent = best;
-        localStorage.setItem('dap-best', String(best));
+        localStorage.setItem('dap-best-qte', String(best));
+      }
+
+      scoreEl.textContent = score;
+      streakEl.textContent = streak;
+      roundEl.textContent = round;
+      bestEl.textContent = best;
+
+      startBtn.disabled = false;
+      startBtn.textContent = 'Start QTE';
+    }
+
+    function qteLoop(now) {
+      if (!qteActive) return;
+      const elapsed = now - qteStart;
+      const remainRatio = Math.max(0, 1 - elapsed / qteDuration);
+      document.documentElement.style.setProperty('--qte', remainRatio.toFixed(3));
+
+      if (elapsed >= qteDuration) {
+        finishQTE('timeout');
+        return;
+      }
+
+      raf = requestAnimationFrame(qteLoop);
+    }
+
+    function startQTE() {
+      if (qteActive) return;
+
+      qteActive = true;
+      requiredKey = KEYS[Math.floor(Math.random() * KEYS.length)];
+      qteDuration = Math.max(850, 1800 - Math.min(950, (round - 1) * 55));
+      qteStart = performance.now();
+
+      qteHud.hidden = false;
+      qteKeyEl.textContent = requiredKey;
+      setMessage(`Quick! Press ${requiredKey}`, '');
+
+      startBtn.disabled = true;
+      startBtn.textContent = 'QTE Running...';
+
+      raf = requestAnimationFrame(qteLoop);
+    }
+
+    function onKeyDown(e) {
+      const key = e.key.toUpperCase();
+
+      if (!qteActive) {
+        if (e.code === 'Space') {
+          e.preventDefault();
+          startQTE();
+        }
+        return;
+      }
+
+      if (!KEYS.includes(key)) return;
+
+      e.preventDefault();
+      if (key === requiredKey) {
+        finishQTE('success');
+      } else {
+        finishQTE('wrong');
       }
     }
 
-    function resetGame() {
+    function resetScore() {
       score = 0;
       streak = 0;
-      phase = 0;
-      speed = 0.0105;
-      lockMs = 0;
+      round = 1;
       scoreEl.textContent = '0';
       streakEl.textContent = '0';
-      setMessage('Fresh round. Sync up and dap!', '');
+      roundEl.textContent = '1';
+      setArms(true);
+      setMessage('Score reset. Hit Start QTE.', '');
+      startBtn.disabled = false;
+      startBtn.textContent = 'Start QTE';
+      qteHud.hidden = true;
+      qteActive = false;
+      cancelAnimationFrame(raf);
     }
 
-    window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space') {
-        e.preventDefault();
-        attemptDap();
-      }
-    });
+    [leftName, rightName, leftSkin, rightSkin, leftShirt, rightShirt, leftHat, rightHat]
+      .forEach(input => input.addEventListener('input', updateCustomization));
 
-    arena.addEventListener('pointerdown', attemptDap);
-    restartBtn.addEventListener('click', resetGame);
+    startBtn.addEventListener('click', startQTE);
+    restartBtn.addEventListener('click', resetScore);
+    window.addEventListener('keydown', onKeyDown);
 
-    setMessage('Time the dap with Space or tap.', '');
-    armWave();
+    updateCustomization();
+    setArms(true);
+    setMessage('Customize players, then start a QTE.', '');
   </script>
 </body>
 </html>
