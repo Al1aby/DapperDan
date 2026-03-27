@@ -1,10 +1,10 @@
  (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/dap-game.html b/dap-game.html
 new file mode 100644
-index 0000000000000000000000000000000000000000..8c2aeb51c771c8839b43a2c5db98143aee2b7bee
+index 0000000000000000000000000000000000000000..bf87bb4396c4febca3a20fd84435294debe0510d
 --- /dev/null
 +++ b/dap-game.html
-@@ -0,0 +1,844 @@
+@@ -0,0 +1,865 @@
 +<!DOCTYPE html>
 +<html lang="en">
 +<head>
@@ -602,10 +602,27 @@ index 0000000000000000000000000000000000000000..8c2aeb51c771c8839b43a2c5db98143a
 +    const leftNameTag = document.getElementById('leftNameTag');
 +    const rightNameTag = document.getElementById('rightNameTag');
 +
++    function safeGet(key, fallback = '0') {
++      try {
++        const value = window.localStorage.getItem(key);
++        return value ?? fallback;
++      } catch (_) {
++        return fallback;
++      }
++    }
++
++    function safeSet(key, value) {
++      try {
++        window.localStorage.setItem(key, value);
++      } catch (_) {
++        // Ignore storage errors (private mode / file:// restrictions).
++      }
++    }
++
 +    let score = 0;
 +    let streak = 0;
 +    let round = 1;
-+    let best = Number(localStorage.getItem('dap-best-qte') || 0);
++    let best = Number(safeGet('dap-best-qte', '0'));
 +
 +    let qteActive = false;
 +    let p1Sequence = [];
@@ -727,7 +744,7 @@ index 0000000000000000000000000000000000000000..8c2aeb51c771c8839b43a2c5db98143a
 +
 +      if (score > best) {
 +        best = score;
-+        localStorage.setItem('dap-best-qte', String(best));
++        safeSet('dap-best-qte', String(best));
 +      }
 +
 +      scoreEl.textContent = score;
@@ -845,7 +862,11 @@ index 0000000000000000000000000000000000000000..8c2aeb51c771c8839b43a2c5db98143a
 +
 +    applySelectedPacks();
 +    setArms(true);
-+    setMessage('Customize players, then start a 2-player QTE.', '');
++    if (location.protocol === 'file:') {
++      setMessage('Opened as a local file. Works offline — press Space to start!', '');
++    } else {
++      setMessage('Customize players, then start a 2-player QTE.', '');
++    }
 +  </script>
 +</body>
 +</html>
